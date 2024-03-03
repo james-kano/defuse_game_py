@@ -1,5 +1,7 @@
 *.ipynb_ch*
-__pychache__
+*__pycache__*
+.idea/
+
 
 venv
 .DS_Store

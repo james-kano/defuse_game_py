@@ -22,7 +22,7 @@
 #     https://github.com/mcauser/micropython-tm1638
 # """
 
-from test.test_decorators import testing_wrapper
+from decorators import testing_wrapper
 
 class TM1638Animated():
     """
@@ -34,6 +34,9 @@ class TM1638Animated():
                  dio,
                  brightness = 7,
                  test_mode = False) -> None:
+
+        self.num_segments = 8
+
         if not test_mode:
             from drivers.rpi_TM1638.TMBoards import TMBoards
             TM1638 = TMBoards(stb=stb,
@@ -41,7 +44,7 @@ class TM1638Animated():
                               dio=dio,
                               brightness=brightness)
 
-        self.num_segments = 8 * self.nbBoards # number of seven-segment displays on board
+            self.num_segments = 8 * TM1638.nbBoards # number of seven-segment displays on board
         self.test_mode = test_mode
 
     @testing_wrapper(message="Performing <ROLL animation>")

@@ -18,11 +18,10 @@ Copyright (C) 2023  James Kano
 """
 
 from inspect import getfullargspec
-from machine import Pin
 from random import randint
 from typing import Callable, Dict, List, Optional
 
-from pico_tm1638_animations import TM1638Animated
+from rpi_tm1638_animations import TM1638Animated
 
 
 class MiniGame:
@@ -35,7 +34,7 @@ class MiniGame:
                  incorrect_answer_action: Callable = None,
                  ) -> None:
         """
-        MiniGame class adds crates a standard design pattern for ease of creating multiple games and running them
+        MiniGame class creates a standard design pattern for ease of creating multiple games and running them
         together.
 
         This class is designed to support both inheritance and composition use cases.
@@ -156,7 +155,8 @@ class SevenSegButtonGame:
     def __init__(self,
                  stb: int,
                  clk: int,
-                 dio: int) -> None:
+                 dio: int,
+                 test_mode: bool = False) -> None:
         """
         7-segment button game main class
 
@@ -167,9 +167,9 @@ class SevenSegButtonGame:
         :param clk: Specifies the clk pin number
         :param dio: Specifies the dio pin number
         """
-        self.tm: TM1638Animated = TM1638Animated(stb=Pin(stb),
-                                                 clk=Pin(clk),
-                                                 dio=Pin(dio),
+        self.tm: TM1638Animated = TM1638Animated(stb=stb,
+                                                 clk=clk,
+                                                 dio=dio,
                                                  brightness=4)
 
         self._game_register: Dict[str, MiniGame] = {}

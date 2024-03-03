@@ -22,25 +22,29 @@
 #     https://github.com/mcauser/micropython-tm1638
 # """
 
-from drivers.rpi_TM1638.TMBoards import TMBoards
+from test.test_decorators import testing_wrapper
 
-class TM1638Animated(TMBoards):
+class TM1638Animated():
     """
-    TM1638Animated inherits from to add animations to the
-    existing TM1638 library
+    TM1638Animated implements existing TM1638 library to add animations.
     """
     def __init__(self,
                  stb,
                  clk,
                  dio,
-                 brightness = 7) -> None:
-        super().__init__(stb=stb,
-                         clk=clk,
-                         dio=dio,
-                         brightness=brightness)
+                 brightness = 7,
+                 test_mode = False) -> None:
+        if not test_mode:
+            from drivers.rpi_TM1638.TMBoards import TMBoards
+            TM1638 = TMBoards(stb=stb,
+                              clk=clk,
+                              dio=dio,
+                              brightness=brightness)
 
         self.num_segments = 8 * self.nbBoards # number of seven-segment displays on board
+        self.test_mode = test_mode
 
+    @testing_wrapper(message="Performing <ROLL animation>")
     def roll(self,
              speed = 250):
         """
@@ -49,6 +53,7 @@ class TM1638Animated(TMBoards):
         """
         pass
 
+    @testing_wrapper(message="Performing <WAVE animation>")
     def wave(self,
              speed = 250):
         """
@@ -57,6 +62,7 @@ class TM1638Animated(TMBoards):
         """
         pass
 
+    @testing_wrapper(message="Performing <LOAD animation>")
     def load(self,
              speed = 250):
         """
@@ -65,6 +71,7 @@ class TM1638Animated(TMBoards):
         """
         pass
 
+    @testing_wrapper(message="Performing <UNLOAD animation>")
     def unload(self,
                speed = 250):
         """
@@ -73,6 +80,7 @@ class TM1638Animated(TMBoards):
         """
         pass
 
+    @testing_wrapper(message="Performing <display LINE>")
     def display_line(self,
                      line):
         """

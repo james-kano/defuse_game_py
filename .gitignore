@@ -1,0 +1,5 @@
+*.ipynb_ch*
+__pychache__
+
+venv
+.DS_Store

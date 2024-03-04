@@ -22,6 +22,7 @@ from random import randint
 from typing import Callable, Dict, List, Optional
 
 from rpi_tm1638_animations import TM1638Animated
+from decorators import testing_wrapper
 
 
 class MiniGame:
@@ -32,6 +33,7 @@ class MiniGame:
                  correct_answer_conditions: List[Optional[int]] = None,
                  correct_answer_action: Callable = None,
                  incorrect_answer_action: Callable = None,
+                 test_mode: bool=False
                  ) -> None:
         """
         MiniGame class creates a standard design pattern for ease of creating multiple games and running them
@@ -67,6 +69,7 @@ class MiniGame:
         self._lives: int = 2
         self._progress: int = 0
         self._show_final_display: bool = False
+        self.test_mode: bool = test_mode
 
     def setup(self) -> None:
         """
@@ -87,12 +90,14 @@ class MiniGame:
             f"The Game has {self._win_length} completion steps and {self.correct_answer_conditions} step answers. " \
             f"This game may be unplayable!"
 
+    @testing_wrapper(message="Game lost!")
     def _lose_screen(self) -> None:
         """
         Displays the game-over screen.
         """
         pass
 
+    @testing_wrapper(message="Game won!")
     def _win_screen(self) -> None:
         """
         Displays the win screen.
@@ -138,7 +143,10 @@ class MiniGame:
                     action_kwargs['tm1638'] = self.tm1638
                 self.incorrect_answer_action(**action_kwargs)
             else:
-                self.tm1638.encode_string("Error")
+                if self.test_mode:
+                    print("Error")
+                else:
+                    self.tm1638.encode_string("Error")
             self._lives -= 1
 
         # take action if the game has been won or lost
@@ -170,7 +178,8 @@ class SevenSegButtonGame:
         self.tm: TM1638Animated = TM1638Animated(stb=stb,
                                                  clk=clk,
                                                  dio=dio,
-                                                 brightness=4)
+                                                 brightness=4,
+                                                 test_mode=test_mode)
 
         self._game_register: Dict[str, MiniGame] = {}
 
@@ -181,6 +190,8 @@ class SevenSegButtonGame:
 
         # internal input monitoring variables
         self.is_pressed: bool = False
+
+        self.test_mode = test_mode
 
     def register_game(self,
                       game_title: str,
@@ -196,6 +207,8 @@ class SevenSegButtonGame:
 
         if game_object.tm1638 is None:
             game_object.tm1638 = self.tm
+
+        game_object.test_mode = self.test_mode
 
     def _check_new_input(self) -> int:
         """

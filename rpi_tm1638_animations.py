@@ -39,12 +39,12 @@ class TM1638Animated():
 
         if not test_mode:
             from drivers.rpi_TM1638.TMBoards import TMBoards
-            TM1638 = TMBoards(stb=stb,
-                              clk=clk,
-                              dio=dio,
-                              brightness=brightness)
+            self.TM1638 = TMBoards(stb=stb,
+                                   clk=clk,
+                                   dio=dio,
+                                   brightness=brightness)
 
-            self.num_segments = 8 * TM1638.nbBoards # number of seven-segment displays on board
+            self.num_segments = 8 * self.TM1638.nbBoards # number of seven-segment displays on board
         self.test_mode = test_mode
 
     @testing_wrapper(message="Performing <ROLL animation>")
@@ -95,6 +95,7 @@ class TM1638Animated():
             "Use self.scroll() for longer display lines"
         for i in range(len(line)):
             self.write(line[i], i)
+
 
 # ToDo:
 # - Add wave / load / unload etc.

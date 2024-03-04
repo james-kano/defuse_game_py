@@ -18,14 +18,12 @@ Copyright (C) 2023  James Kano
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from machine import Pin
 from random import randint
 from seg_game import SevenSegButtonGame, MiniGame
 import time
 from typing import List
 
-from ab123 import TM1638Animated as Tm
-
+from rpi_tm1638_animations import TM1638Animated as Tm
 
 # ------------------- #
 #     Memory game     #
@@ -41,7 +39,7 @@ def memory_setup(tm1638: Tm) -> List[int]:
     :param tm1638: tm1638 interface (auto-assigned by MiniGame)
     :return: List of correct answers as integers
     """
-    memorable_sequence = [1 << randint(1, 8) for None in range(mem_win_length)]
+    memorable_sequence = [1 << randint(1, 8) for i in range(mem_win_length)]
     for led_num in memorable_sequence:
         tm1638.led(led_num, 1)
         time.sleep(0.5)
@@ -86,9 +84,9 @@ def main():
     Main method to be executed upon microcontroller boot
     """
     # setup for main execution
-    seg_game = SevenSegButtonGame(stb=Pin(2),
-                                  clk=Pin(3),
-                                  dio=Pin(4))
+    seg_game = SevenSegButtonGame(stb=2,
+                                  clk=3,
+                                  dio=4)
 
     seg_game.register_game('memory', memory_game)
     seg_game.register_game('math', math_game)

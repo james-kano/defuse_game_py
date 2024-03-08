@@ -36,12 +36,14 @@ class TM1638Animated():
                  test_mode = False) -> None:
 
         self.num_segments = 8
+        self.num_leds = 8
 
         if not test_mode:
             from drivers.rpi_TM1638.TMBoards import TMBoards
-            self.TM1638 = TMBoards(stb=stb,
-                                   clk=clk,
-                                   dio=dio,
+            from machine import Pin
+            self.TM1638 = TMBoards(stb=Pin(stb),
+                                   clk=Pin(clk),
+                                   dio=Pin(dio),
                                    brightness=brightness)
 
             self.num_segments = 8 * self.TM1638.nbBoards # number of seven-segment displays on board
@@ -96,7 +98,32 @@ class TM1638Animated():
         for i in range(len(line)):
             self.write(line[i], i)
 
+    def LEDs_from_left(self,
+                       value: int) -> None:
+        """
+        Displays a number expressed as LEDs illuminated from the left
+        e.g. 4 = 1,1,1,1,0,0,0,0 (first 4 leds illuminated)
+        """
+        if self.test_mode:
+            test_print_list = ["*" if i < value
+                               else "O"
+                               for i in range(self.num_leds)]
+            test_print_list = str(test_print_list).replace(',', '').replace("'", '')
+            print(f"LEDs: {test_print_list}")
+            return
+
+        # ToDo: add the interface to the driver to display as required
+
+    @testing_wrapper(message="<clear dislpay>")
+    def clear_display(self):
+        """
+        Clears the display
+        """
+        self.TM1638.clearDisplay()
+
+
+
 
 # ToDo:
-# - Add wave / load / unload etc.
+# - Add roll / wave / load / unload etc.
 # - Add ability to write custom values to display.

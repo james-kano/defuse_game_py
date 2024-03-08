@@ -25,6 +25,7 @@ from typing import List
 
 from rpi_tm1638_animations import TM1638Animated as Tm
 
+
 # ------------------- #
 #     Memory game     #
 # ------------------- #
@@ -70,7 +71,33 @@ memory_game.correct_answer_action = memory_correct_answer_action
 # ----------------- #
 
 math_win_length = 3
-math_game = MiniGame(win_length=math_win_length)
+
+
+def math_setup(tm1638: Tm):
+    """
+    Setup answers and starting display for math game
+
+    :param tm1638: tm1638 interface (auto-assigned by MiniGame)
+    :return: List of correct answers as integers
+    """
+
+    pass
+
+
+def math_correct_answer_action(progress: int,
+                               tm1638: Tm):
+    """
+    Display / response when a correct answer is given for math game
+
+    :param progress: integer of the game's progress (auto-assigned by MiniGame)
+    :param tm1638: tm1638 interface (auto-assigned by MiniGame)
+    """
+    pass
+
+
+math_game = MiniGame(win_length=math_win_length,
+                     )
+
 
 # ------------------------------ #
 #     Spatial reasoning game     #
@@ -94,8 +121,11 @@ def main():
 
     seg_game.setup()
 
-    while True:
-        seg_game.game_loop()
+    while seg_game.selected_game._alive:
+        if seg_game.in_standby:
+            seg_game.standby_start_loop
+        else:
+            seg_game.game_loop()
 
 
 # Press the green button in the gutter to run the script.

@@ -18,11 +18,12 @@ Copyright (C) 2023  James Kano
 """
 
 from inspect import getfullargspec
-from machine import Pin
 from random import randint
+from time import sleep
 from typing import Callable, Dict, List, Optional
 
-from pico_tm1638_animations import TM1638Animated
+from rpi_tm1638_animations import TM1638Animated
+from decorators import testing_wrapper
 
 
 class MiniGame:
@@ -33,9 +34,10 @@ class MiniGame:
                  correct_answer_conditions: List[Optional[int]] = None,
                  correct_answer_action: Callable = None,
                  incorrect_answer_action: Callable = None,
+                 test_mode: bool=False
                  ) -> None:
         """
-        MiniGame class adds crates a standard design pattern for ease of creating multiple games and running them
+        MiniGame class creates a standard design pattern for ease of creating multiple games and running them
         together.
 
         This class is designed to support both inheritance and composition use cases.
@@ -62,12 +64,13 @@ class MiniGame:
         self.correct_answer_action: Callable = correct_answer_action
         self.incorrect_answer_action: Callable = incorrect_answer_action
 
-        # internal monitoring variables
+        # monitoring variables
         self._win_length: int = win_length
         self._alive: bool = True
         self._lives: int = 2
         self._progress: int = 0
         self._show_final_display: bool = False
+        self.test_mode: bool = test_mode
 
     def setup(self) -> None:
         """
@@ -88,22 +91,31 @@ class MiniGame:
             f"The Game has {self._win_length} completion steps and {self.correct_answer_conditions} step answers. " \
             f"This game may be unplayable!"
 
+    @testing_wrapper(message="Game lost!")
     def _lose_screen(self) -> None:
         """
         Displays the game-over screen.
         """
         pass
 
+    @testing_wrapper(message="Game won!")
     def _win_screen(self) -> None:
         """
         Displays the win screen.
         """
         self.tm1638.encode_string("--safe--")
 
-    def final_display(self) -> None:
+    def final_display(self,
+                      set_lose: bool = False) -> None:
         """
         Shows the final screen for a game (win or lose).
+
+        :param set_lose: Enables the game to be externally set to lost
         """
+        if set_lose:
+            self._alive = False
+            self._show_final_display = True
+
         if self._alive:
             self._win_screen()
         else:
@@ -139,7 +151,10 @@ class MiniGame:
                     action_kwargs['tm1638'] = self.tm1638
                 self.incorrect_answer_action(**action_kwargs)
             else:
-                self.tm1638.encode_string("Error")
+                if self.test_mode:
+                    print("Error")
+                else:
+                    self.tm1638.encode_string("Error")
             self._lives -= 1
 
         # take action if the game has been won or lost
@@ -156,7 +171,8 @@ class SevenSegButtonGame:
     def __init__(self,
                  stb: int,
                  clk: int,
-                 dio: int) -> None:
+                 dio: int,
+                 test_mode: bool = False) -> None:
         """
         7-segment button game main class
 
@@ -167,20 +183,27 @@ class SevenSegButtonGame:
         :param clk: Specifies the clk pin number
         :param dio: Specifies the dio pin number
         """
-        self.tm: TM1638Animated = TM1638Animated(stb=Pin(stb),
-                                                 clk=Pin(clk),
-                                                 dio=Pin(dio),
-                                                 brightness=4)
+        self.tm: TM1638Animated = TM1638Animated(stb=stb,
+                                                 clk=clk,
+                                                 dio=dio,
+                                                 brightness=4,
+                                                 test_mode=test_mode)
 
         self._game_register: Dict[str, MiniGame] = {}
+        self.selected_game: Optional[MiniGame] = None
 
         # internal monitoring variables
         self._game_select: int = 0
-        self._selected_game: Optional[MiniGame] = None
         self._setup_run: bool = False
 
+        # standby variables
+        self.in_standby: bool = True
+        self._standby_presses: int = 0
+
         # internal input monitoring variables
-        self.is_pressed: bool = False
+        self._is_pressed: bool = False
+
+        self.test_mode = test_mode
 
     def register_game(self,
                       game_title: str,
@@ -197,6 +220,8 @@ class SevenSegButtonGame:
         if game_object.tm1638 is None:
             game_object.tm1638 = self.tm
 
+        game_object.test_mode = self.test_mode
+
     def _check_new_input(self) -> int:
         """
         This function gets the button input, but prevents single presses from being registered multiple times. While a
@@ -205,12 +230,11 @@ class SevenSegButtonGame:
         :return: Integer of allowed button input
         """
         key_pressed = int(self.tm.qyf_keys())
-        if key_pressed > 0 and not self.is_pressed:
-            self.is_pressed = True
+        if key_pressed > 0 and not self._is_pressed:
+            self._is_pressed = True
             return key_pressed
-        elif key_pressed == 0 and self.is_pressed:
-            self.is_pressed = False
-
+        elif key_pressed == 0 and self._is_pressed:
+            self._is_pressed = False
         return 0
 
     def setup(self,
@@ -221,14 +245,45 @@ class SevenSegButtonGame:
 
         :param selected_game_name: Enables a specific game to be selected and played
         """
+        assert len(self._game_register) > 0, "No games registered! Please ragester at least 1 game."
         if selected_game_name is None:
             self._game_select = randint(0, len(self._game_register) - 1)
             selected_game_name = list(self._game_register.keys())[self._game_select]
 
-        self._selected_game = self._game_register[selected_game_name]
-        self._selected_game.setup()
+        self.selected_game = self._game_register[selected_game_name]
+        self.selected_game.setup()
 
         self._setup_run = True
+
+    def show_selected_game(self) -> None:
+        """
+        Displays the selected game on the LED display by the number of lit LEDs
+        """
+        game_select_display = (1 << (self._game_select + 1)) - 1
+        self.tm.clear_display()
+        self.tm.roll()
+        sleep(1)
+        self.tm.clear_display()
+        self.tm.LEDs_from_left(game_select_display)
+
+    def standby_start_loop(self) -> None:
+        """
+        Executes game display then awaits user activation of the game(s)
+        """
+        # show selected game number and get the player input
+        self.shows_elected_game()
+        player_input = self._check_new_input()
+
+        if player_input > 0:
+            if player_input == 64:
+                self.standby_presses += 1
+            else:
+                self.selected_game.final_display(set_lose=False)
+
+        # exit standby mode if the correct button is pressed twice
+        if self._standby_presses >= 2:
+            self.in_standby = False
+
 
     def game_loop(self) -> None:
         """
@@ -244,4 +299,4 @@ class SevenSegButtonGame:
 
         # pass the player input to the game to play a turn
         if player_input > 0:
-            self._selected_game.play(player_input)
+            self.selected_game.play(player_input)

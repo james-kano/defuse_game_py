@@ -22,25 +22,34 @@
 #     https://github.com/mcauser/micropython-tm1638
 # """
 
-from drivers.rpi_TM1638.TMBoards import TMBoards
+from decorators import testing_wrapper
 
-class TM1638Animated(TMBoards):
+class TM1638Animated():
     """
-    TM1638Animated inherits from to add animations to the
-    existing TM1638 library
+    TM1638Animated implements existing TM1638 library to add animations.
     """
     def __init__(self,
                  stb,
                  clk,
                  dio,
-                 brightness = 7) -> None:
-        super().__init__(stb=stb,
-                         clk=clk,
-                         dio=dio,
-                         brightness=brightness)
+                 brightness = 7,
+                 test_mode = False) -> None:
 
-        self.num_segments = 8 * self.nbBoards # number of seven-segment displays on board
+        self.num_segments = 8
+        self.num_leds = 8
 
+        if not test_mode:
+            from drivers.rpi_TM1638.TMBoards import TMBoards
+            from machine import Pin
+            self.TM1638 = TMBoards(stb=Pin(stb),
+                                   clk=Pin(clk),
+                                   dio=Pin(dio),
+                                   brightness=brightness)
+
+            self.num_segments = 8 * self.TM1638.nbBoards # number of seven-segment displays on board
+        self.test_mode = test_mode
+
+    @testing_wrapper(message="Performing <ROLL animation>")
     def roll(self,
              speed = 250):
         """
@@ -49,6 +58,7 @@ class TM1638Animated(TMBoards):
         """
         pass
 
+    @testing_wrapper(message="Performing <WAVE animation>")
     def wave(self,
              speed = 250):
         """
@@ -57,6 +67,7 @@ class TM1638Animated(TMBoards):
         """
         pass
 
+    @testing_wrapper(message="Performing <LOAD animation>")
     def load(self,
              speed = 250):
         """
@@ -65,6 +76,7 @@ class TM1638Animated(TMBoards):
         """
         pass
 
+    @testing_wrapper(message="Performing <UNLOAD animation>")
     def unload(self,
                speed = 250):
         """
@@ -73,6 +85,7 @@ class TM1638Animated(TMBoards):
         """
         pass
 
+    @testing_wrapper(message="Performing <display LINE>")
     def display_line(self,
                      line):
         """
@@ -85,6 +98,32 @@ class TM1638Animated(TMBoards):
         for i in range(len(line)):
             self.write(line[i], i)
 
+    def LEDs_from_left(self,
+                       value: int) -> None:
+        """
+        Displays a number expressed as LEDs illuminated from the left
+        e.g. 4 = 1,1,1,1,0,0,0,0 (first 4 leds illuminated)
+        """
+        if self.test_mode:
+            test_print_list = ["*" if i < value
+                               else "O"
+                               for i in range(self.num_leds)]
+            test_print_list = str(test_print_list).replace(',', '').replace("'", '')
+            print(f"LEDs: {test_print_list}")
+            return
+
+        # ToDo: add the interface to the driver to display as required
+
+    @testing_wrapper(message="<clear dislpay>")
+    def clear_display(self):
+        """
+        Clears the display
+        """
+        self.TM1638.clearDisplay()
+
+
+
+
 # ToDo:
-# - Add wave / load / unload etc.
+# - Add roll / wave / load / unload etc.
 # - Add ability to write custom values to display.

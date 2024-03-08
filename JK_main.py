@@ -40,7 +40,7 @@ def memory_setup(tm1638: Tm) -> List[int]:
     :param tm1638: tm1638 interface (auto-assigned by MiniGame)
     :return: List of correct answers as integers
     """
-    memorable_sequence = [1 << randint(1, 8) for i in range(mem_win_length)]
+    memorable_sequence = [1 << randint(0, 7) for i in range(mem_win_length)]
     for led_num in memorable_sequence:
         tm1638.led(led_num, 1)
         time.sleep(0.5)

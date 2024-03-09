@@ -21,7 +21,7 @@ Copyright (C) 2023  James Kano
 from random import randint
 from seg_game import SevenSegButtonGame, MiniGame
 import time
-from typing import List
+from typing import Any, List
 
 from rpi_tm1638_animations import TM1638Animated as Tm
 
@@ -33,7 +33,7 @@ from rpi_tm1638_animations import TM1638Animated as Tm
 mem_win_length = 5
 
 
-def memory_setup(tm1638: Tm) -> List[int]:
+def memory_setup(tm1638: Tm) -> Any:
     """
     Setup answers and starting display for memory game
 
@@ -47,18 +47,25 @@ def memory_setup(tm1638: Tm) -> List[int]:
         tm1638.leds(0)
         time.sleep(0.25)
         tm1638.encode_string('-' * mem_win_length)
-    return memorable_sequence
+
+    start_seg_display = [64] * mem_win_length
+
+    return memorable_sequence, start_seg_display
 
 
 def memory_correct_answer_action(progress: int,
-                                 tm1638: Tm) -> None:
+                                 tm1638: Tm) -> List[Any]:
     """
     Display / response when a correct answer is given for memory game
 
     :param progress: integer of the game's progress (auto-assigned by MiniGame)
     :param tm1638: tm1638 interface (auto-assigned by MiniGame)
+    :return: List of segments for the game display
     """
-    tm1638.write(0, progress)
+    current_seg_display = [0 if i < progress
+                           else 64
+                           for i in range(mem_win_length)]
+    return current_seg_display
 
 
 memory_game = MiniGame(win_length=mem_win_length)

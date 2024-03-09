@@ -20,7 +20,7 @@ Copyright (C) 2023  James Kano
 from inspect import getfullargspec
 from random import randint
 from time import sleep
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from rpi_tm1638_animations import TM1638Animated
 from decorators import testing_wrapper
@@ -63,6 +63,7 @@ class MiniGame:
         self.correct_answer_conditions: List[Optional[int]] = correct_answer_conditions
         self.correct_answer_action: Callable = correct_answer_action
         self.incorrect_answer_action: Callable = incorrect_answer_action
+        self.game_seg_display: List[Any] = None
 
         # monitoring variables
         self._win_length: int = win_length
@@ -78,18 +79,21 @@ class MiniGame:
             Note: By default this is not called during class initiation to save memory when multiple MiniGame instances
             are registered.
         """
+        # run the setup routine
         if self.setup_routine is not None:
+            # inject any required self-stored objects into the function
             setup_routine_args = getfullargspec(self.setup_routine)._asdict()['args']
-
             setup_kwargs = {}
             if 'tm1638' in setup_routine_args:
                 setup_kwargs['tm1638'] = self.tm1638
 
-            self.correct_answer_conditions = self.setup_routine(**setup_kwargs)
+            # run the setup routine
+            self.correct_answer_conditions, self.game_seg_display = self.setup_routine(**setup_kwargs)
 
         assert len(self.correct_answer_conditions) == self._win_length, \
             f"The Game has {self._win_length} completion steps and {self.correct_answer_conditions} step answers. " \
             f"This game may be unplayable!"
+
 
     @testing_wrapper(message="Game lost!")
     def _lose_screen(self) -> None:
@@ -134,6 +138,7 @@ class MiniGame:
 
         # take action according to the turn input
         if input_button == self.correct_answer_conditions[self._progress]:
+            self._progress += 1
             if self.correct_answer_action is not None:
                 action_kwargs = {}
                 correct_answer_action_args = getfullargspec(self.correct_answer_action)._asdict()['args']
@@ -141,8 +146,7 @@ class MiniGame:
                     action_kwargs['progress'] = self._progress
                 if 'tm1638' in correct_answer_action_args:
                     action_kwargs['tm1638'] = self.tm1638
-                self.correct_answer_action(**action_kwargs)
-            self._progress += 1
+                self.game_seg_display = self.correct_answer_action(**action_kwargs)
         else:
             if self.incorrect_answer_action is not None:
                 action_kwargs = {}
@@ -155,16 +159,20 @@ class MiniGame:
                     print("Error")
                 else:
                     self.tm1638.encode_string("Error")
+                    sleep(1)
             self._lives -= 1
 
         # take action if the game has been won or lost
         if self._progress == self._win_length:
             self._show_final_display = True
             self.final_display()
-        elif self._lives == 0:
+        elif self._lives < 0:
             self._alive = False
             self._show_final_display = True
             self.final_display()
+        else:
+            # show the game screen by default
+            self.tm1638.display_line(self.game_seg_display)
 
 
 class SevenSegButtonGame:

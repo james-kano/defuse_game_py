@@ -81,13 +81,14 @@ class MiniGame:
         """
         # run the setup routine
         if self.setup_routine is not None:
+            # inject any required self-stored objects into the function
             setup_routine_args = getfullargspec(self.setup_routine)._asdict()['args']
-
             setup_kwargs = {}
             if 'tm1638' in setup_routine_args:
                 setup_kwargs['tm1638'] = self.tm1638
 
-            self.correct_answer_conditions = self.setup_routine(**setup_kwargs)
+            # run the setup routine
+            self.correct_answer_conditions, self.game_seg_display = self.setup_routine(**setup_kwargs)
 
         assert len(self.correct_answer_conditions) == self._win_length, \
             f"The Game has {self._win_length} completion steps and {self.correct_answer_conditions} step answers. " \
@@ -134,12 +135,10 @@ class MiniGame:
         if self._show_final_display:
             self.final_display()
             return
-        else:
-            # show the game screen by default
-            self.tm1638.display_line(self.game_seg_display)
 
         # take action according to the turn input
         if input_button == self.correct_answer_conditions[self._progress]:
+            self._progress += 1
             if self.correct_answer_action is not None:
                 action_kwargs = {}
                 correct_answer_action_args = getfullargspec(self.correct_answer_action)._asdict()['args']
@@ -147,8 +146,7 @@ class MiniGame:
                     action_kwargs['progress'] = self._progress
                 if 'tm1638' in correct_answer_action_args:
                     action_kwargs['tm1638'] = self.tm1638
-                self.correct_answer_action(**action_kwargs)
-            self._progress += 1
+                self.game_seg_display = self.correct_answer_action(**action_kwargs)
         else:
             if self.incorrect_answer_action is not None:
                 action_kwargs = {}
@@ -168,10 +166,13 @@ class MiniGame:
         if self._progress == self._win_length:
             self._show_final_display = True
             self.final_display()
-        elif self._lives == 0:
+        elif self._lives < 0:
             self._alive = False
             self._show_final_display = True
             self.final_display()
+        else:
+            # show the game screen by default
+            self.tm1638.display_line(self.game_seg_display)
 
 
 class SevenSegButtonGame:

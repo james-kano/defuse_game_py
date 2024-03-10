@@ -53,9 +53,7 @@ def memory_setup(tm1638: Tm) -> Any:
     return memorable_sequence, start_seg_display
 
 
-def memory_correct_answer_action(progress: int,
-                                 tm1638: Tm,
-                                 input_button: int) -> List[Any]:
+def memory_correct_answer_action(progress: int) -> List[Any]:
     """
     Display / response when a correct answer is given for memory game
 

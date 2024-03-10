@@ -33,6 +33,7 @@ class MiniGame:
                  setup_routine: Callable = None,
                  correct_answer_conditions: List[Optional[int]] = None,
                  map_input: Callable = None,
+                 show_button_feedback: bool = True,
                  correct_answer_action: Callable = None,
                  incorrect_answer_action: Callable = None,
                  test_mode: bool=False
@@ -57,6 +58,7 @@ class MiniGame:
         :param map_input: Function to convert a raw button press into a comparable answer
             • This may be useful where multiple correct answers are possible
             • Returns the converted input for answer comparison
+        :param show_button_feedback: Determines if a corresponding LED should light with a button press
         :param correct_answer_action: Function for correct action response (progress increment is handled automatically)
             • This may take an argument of 'progress' which will access the MiniGame's progress attribute
             • Returns the updated segment display
@@ -75,6 +77,7 @@ class MiniGame:
 
         # UI variables
         self.game_seg_display: List[Any] = None
+        self.show_button_feedback: bool = show_button_feedback
 
         # monitoring variables
         self._win_length: int = win_length
@@ -326,4 +329,8 @@ class SevenSegButtonGame:
 
         # pass the player input to the game to play a turn
         if player_input > 0:
+            if self.selected_game.show_button_feedback:
+                self.tm.LEDs(player_input)
             self.selected_game.play(player_input)
+        elif self.selected_game.show_button_feedback:
+            self.LEDs(0)

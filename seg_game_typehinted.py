@@ -32,6 +32,7 @@ class MiniGame:
                  tm1638: TM1638Animated = None,
                  setup_routine: Callable = None,
                  correct_answer_conditions: List[Optional[int]] = None,
+                 map_input: Callable = None,
                  correct_answer_action: Callable = None,
                  incorrect_answer_action: Callable = None,
                  test_mode: bool=False
@@ -47,13 +48,20 @@ class MiniGame:
         :param win_length: Number of steps / turns required to complete the game
         :param setup_routine: Function to set up a MiniGame
             • This may take an argument of 'tm1638', the tm1638 object to be used
-            • This may return a list (or iterable) of correct_answer_conditions
+            • This may return:
+                - a list (or iterable) of correct_answer_conditions
+                - the starting display for the segments
         :param correct_answer_conditions: List of correct answers (typically list of ints)
             • This may be determined randomly by the setup routine. If so, the setup_routine() should return the correct
             answer list, which will be stored to self.correct_answer_conditions
+        :param map_input: Function to convert a raw button press into a comparable answer
+            • This may be useful where multiple correct answers are possible
+            • Returns the converted input for answer comparison
         :param correct_answer_action: Function for correct action response (progress increment is handled automatically)
             • This may take an argument of 'progress' which will access the MiniGame's progress attribute
+            • Returns the updated segment display
         :param incorrect_answer_action: Function for incorrect action response (life decrement is handled automatically)
+            • Returns the updated progress
         """
         self.tm1638 = tm1638
 
@@ -61,8 +69,11 @@ class MiniGame:
 
         # store conditions and action for correct answer
         self.correct_answer_conditions: List[Optional[int]] = correct_answer_conditions
+        self.map_input: Callable = map_input
         self.correct_answer_action: Callable = correct_answer_action
         self.incorrect_answer_action: Callable = incorrect_answer_action
+
+        # UI variables
         self.game_seg_display: List[Any] = None
 
         # monitoring variables
@@ -137,11 +148,15 @@ class MiniGame:
             return
 
         # take action according to the turn input
+        if self.map_input:
+            input_button = self.map_input(input_button)
         if input_button == self.correct_answer_conditions[self._progress]:
             self._progress += 1
             if self.correct_answer_action is not None:
                 action_kwargs = {}
                 correct_answer_action_args = getfullargspec(self.correct_answer_action)._asdict()['args']
+                if 'input_button' in correct_answer_action_args:
+                    action_kwargs['input_button'] = input_button
                 if 'progress' in correct_answer_action_args:
                     action_kwargs['progress'] = self._progress
                 if 'tm1638' in correct_answer_action_args:
@@ -151,9 +166,13 @@ class MiniGame:
             if self.incorrect_answer_action is not None:
                 action_kwargs = {}
                 incorrect_answer_action_args = getfullargspec(self.incorrect_answer_action)._asdict()['args']
+                if 'input_button' in incorrect_answer_action_args:
+                    action_kwargs['input_button'] = input_button
+                if 'progress' in incorrect_answer_action_args:
+                    action_kwargs['progress'] = self._progress
                 if 'tm1638' in incorrect_answer_action_args:
                     action_kwargs['tm1638'] = self.tm1638
-                self.incorrect_answer_action(**action_kwargs)
+                self._progress = self.incorrect_answer_action(**action_kwargs)
             else:
                 if self.test_mode:
                     print("Error")

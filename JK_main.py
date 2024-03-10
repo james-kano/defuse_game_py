@@ -54,7 +54,8 @@ def memory_setup(tm1638: Tm) -> Any:
 
 
 def memory_correct_answer_action(progress: int,
-                                 tm1638: Tm) -> List[Any]:
+                                 tm1638: Tm,
+                                 input_button: int) -> List[Any]:
     """
     Display / response when a correct answer is given for memory game
 
@@ -65,6 +66,7 @@ def memory_correct_answer_action(progress: int,
     current_seg_display = [0 if i < progress
                            else 64
                            for i in range(mem_win_length)]
+
     return current_seg_display
 
 
@@ -103,7 +105,7 @@ def math_correct_answer_action(progress: int,
 
 
 math_game = MiniGame(win_length=math_win_length,
-                     )
+                     setup_routine=math_setup)
 
 
 # ------------------------------ #

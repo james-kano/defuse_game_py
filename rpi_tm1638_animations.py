@@ -98,6 +98,20 @@ class TM1638Animated():
         for i in range(len(line)):
             self.write(line[i], i)
 
+    def LEDs(self,
+             value: int) -> None:
+        """
+        Displays LEDs based on binary integer from right
+        """
+        if self.test_mode:
+            bin_format = f"0{self.num_leds}b"
+            bin_str = str(format(value, bin_format))
+            test_print_list = ['*' if digit == '1' else 'O' for digit in bin_str]
+            test_print_list = str(test_print_list).replace(',', '').replace("'", '')
+            print(f"LEDs: {test_print_list}")
+
+        # ToDo: add the interface to the driver to display as required
+
     def LEDs_from_left(self,
                        value: int) -> None:
         """

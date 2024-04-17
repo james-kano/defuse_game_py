@@ -23,6 +23,7 @@
 # """
 
 from decorators import testing_wrapper
+from display_mocks import seg_mock
 
 class TM1638Animated():
     """
@@ -85,7 +86,6 @@ class TM1638Animated():
         """
         pass
 
-    @testing_wrapper(message="Performing <display LINE>")
     def display_line(self,
                      line):
         """
@@ -95,6 +95,12 @@ class TM1638Animated():
         assert len(line) <= self.num_segments, \
             f"This board is currently configured for a maximum of {self.num_segments} segment displays. " \
             "Use self.scroll() for longer display lines"
+
+        if self.test_mode:
+            seg = seg_mock()
+            seg.print_segs(line)
+            return
+
         for i in range(len(line)):
             self.write(line[i], i)
 

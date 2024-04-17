@@ -23,7 +23,7 @@
 # """
 
 from decorators import testing_wrapper
-from display_mocks import seg_mock
+from display_mocks import seg_mock, led_mock
 
 class TM1638Animated():
     """
@@ -97,8 +97,8 @@ class TM1638Animated():
             "Use self.scroll() for longer display lines"
 
         if self.test_mode:
-            seg = seg_mock()
-            seg.print_segs(line)
+            test_seg = seg_mock()
+            test_seg.print_segs(line)
             return
 
         for i in range(len(line)):
@@ -110,11 +110,9 @@ class TM1638Animated():
         Displays LEDs based on binary integer from right
         """
         if self.test_mode:
-            bin_format = f"0{self.num_leds}b"
-            bin_str = str(format(value, bin_format))
-            test_print_list = ['*' if digit == '1' else 'O' for digit in bin_str]
-            test_print_list = str(test_print_list).replace(',', '').replace("'", '')
-            print(f"LEDs: {test_print_list}")
+            test_leds = led_mock(self.num_leds)
+            test_leds.print_val(value)
+            return
 
         # ToDo: add the interface to the driver to display as required
 

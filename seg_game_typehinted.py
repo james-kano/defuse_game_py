@@ -218,8 +218,8 @@ class MiniGame:
             self.final_display()
         else:
             # show the game screen by default
-            self.tm1638.display_line(self.game_seg_display)
             self.tm1638.LEDs(self.game_LED_display)
+            self.tm1638.display_line(self.game_seg_display)
 
 
 class SevenSegButtonGame:

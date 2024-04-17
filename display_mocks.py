@@ -1,5 +1,20 @@
 """
-File to print out mock-ups of the tm1638 display (7-segment and LEDs)
+File to render a mock-up of the tm1638 display (7-segment and LEDs).
+
+To render the display in full, make the following calls in this order:
+    led_mock.print_val(<value>)
+    seg_mock.print_segs(<line>)
+    
+Appearance of rendered display:
+
+     •   •   •   •   •   •   •   •  
+     _   _   _   _   _   _   _   _  
+    |_| |_| |_| |_| |_| |_| |_| |_| 
+    |_|.|_|.|_|.|_|.|_|.|_|.|_|.|_|.
+    
+The printed (rendered) version shows bold red for illuminated and grey for off. Lit LEDs appear as a red star.
+For colour-blindness accessibility, please comment out font.on and uncomment the alternative font.on for blue.
+
 """
 from typing import Dict, List, Optional
 
@@ -9,23 +24,24 @@ class font:
     class for ease of font changes
     """
     black: str = '\x1b[0m'
-    grey: str = '\033[97m'
-    red: str = '\x1b[31m'
+    off: str = '\033[97m' # grey
+    on: str = '\x1b[31m' # red
+    # on: str = '\033[94m' # blue
     bold: str = '\033[1m'
     
     
-def colour_red(red_str: str) -> str:
+def colour_on(on_str: str) -> str:
         """
-        Wraps a given string in red colouring (then returns to black)
+        Wraps a given string in on colouring (then returns to black)
         """
-        return f"{font.bold}{font.red}{red_str}{font.black}"
+        return f"{font.bold}{font.on}{on_str}{font.black}"
     
 
-def colour_grey(grey_str: str) -> str:
+def colour_off(off_str: str) -> str:
         """
-        Wraps a given string in grey colouring (then returns to black)
+        Wraps a given string in off colouring (then returns to black)
         """
-        return f"{font.grey}{grey_str}{font.black}"
+        return f"{font.off}{off_str}{font.black}"
     
 
     
@@ -103,9 +119,9 @@ class seg_mock:
             for val in input_byte_str:
                 val = int(val)
                 if val:
-                    display_elements.append(colour_red(element_chars[i_val]))
+                    display_elements.append(colour_on(element_chars[i_val]))
                 else:
-                    display_elements.append(colour_grey(element_chars[i_val]))
+                    display_elements.append(colour_off(element_chars[i_val]))
                 i_val += 1
             
             
@@ -139,8 +155,8 @@ class led_mock:
         """
         bin_format = f"0{self.num_leds}b"
         bin_str = str(format(value, bin_format))
-        test_print_list = [colour_red(' *  ') if digit == '1' 
-                           else colour_grey(' •  ') 
+        test_print_list = [colour_on(' *  ') if digit == '1' 
+                           else colour_off(' •  ') 
                            for digit in bin_str]
         print("".join(test_print_list))
     
@@ -150,8 +166,8 @@ class led_mock:
         """
         Prints the number as number of LEDs lit
         """
-        test_print_list = [colour_red(' *  ') if i < value
-                           else colour_grey(' •  ')
+        test_print_list = [colour_on(' *  ') if i < value
+                           else colour_off(' •  ')
                            for i in range(self.num_leds)]
         print("".join(test_print_list))
         

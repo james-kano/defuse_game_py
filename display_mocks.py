@@ -38,7 +38,7 @@ class seg_mock:
         
         self.num_segs: int = num_segs
         self.display_bytes: List[int]
-        self._ints: List[int] = [63, 6, 91, 79, 102, 109, 125, 7, 127, 111] #103
+        self._ints: List[int] = [63, 6, 91, 79, 102, 109, 125, 7, 127, 111]
         self._chars: Dict[str, int] = {'-': 64,
                                        '_': 8,
                                        ' ': 0,
@@ -132,14 +132,29 @@ class led_mock:
         self.display_bits: List[int]    
     
         
-    def print_val(self, value: int) -> None:
-        
+    def print_val(self,
+                  value: int) -> None:
+        """
+        Prints the LEDs as a binary representation of an integer
+        """
         bin_format = f"0{self.num_leds}b"
         bin_str = str(format(value, bin_format))
         test_print_list = [colour_red(' *  ') if digit == '1' 
                            else colour_grey(' •  ') 
                            for digit in bin_str]
-        # test_print_list = str(test_print_list).replace(',', '').replace("'", '')
         print("".join(test_print_list))
+    
+    
+    def print_val_from_left(self,
+                            value: int) -> None:
+        """
+        Prints the number as number of LEDs lit
+        """
+        test_print_list = [colour_red(' *  ') if i < value
+                           else colour_grey(' •  ')
+                           for i in range(self.num_leds)]
+        print("".join(test_print_list))
+        
+    
         
     

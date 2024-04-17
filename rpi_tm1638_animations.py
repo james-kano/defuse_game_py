@@ -123,11 +123,8 @@ class TM1638Animated():
         e.g. 4 = 1,1,1,1,0,0,0,0 (first 4 leds illuminated)
         """
         if self.test_mode:
-            test_print_list = ["*" if i < value
-                               else "O"
-                               for i in range(self.num_leds)]
-            test_print_list = str(test_print_list).replace(',', '').replace("'", '')
-            print(f"LEDs: {test_print_list}")
+            test_leds = led_mock(self.num_leds)
+            test_leds.print_val_from_left(value)
             return
 
         # ToDo: add the interface to the driver to display as required

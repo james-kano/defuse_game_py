@@ -17,6 +17,7 @@ For colour-blindness accessibility, please comment out font.on and uncomment the
 
 """
 from typing import Dict, List, Optional
+from copy import deepcopy
 
 
 class font:
@@ -77,14 +78,43 @@ class seg_mock:
                 inputs = ''.join(_input)
             except:
                 # list of ints provided
-                inputs = _input
+                inputs = deepcopy(_input)
         else:
             inputs = str(_input)
             
+        # Detect the input mode (mappable character, mappable number, raw displayable bytes)
+        input_modes = []
+        for item in inputs:
+            try:
+                item = int(item)
+                if item < len(self._ints):
+                    input_modes.append('number')
+                else:
+                    input_modes.append('bytes')
+            except:
+                if item.lower() in self._chars:
+                    input_modes.append('string')
+                else:
+                    raise Exception(f'Unsupported character passed in input: {item}')
+                    
+                    
+        input_mode = 'bytes'
+        if 'bytes' not in input_modes:
+            if 'string' in input_modes:
+                input_mode = 'string'
+            else:
+                input_mode = 'number'
+                        
+                        
+        
         assert len(inputs) <= self.num_segs, f'Input cannot be longer than {self.num_segs}'
         # render any unused segments
         if len(inputs) < self.num_segs:
-            inputs += ' ' * (self.num_segs - len(inputs))
+            if input_mode == 'bytes':
+                while len(inputs) < self.num_segs:
+                    inputs.append(0)
+            else:
+                inputs += ' ' * (self.num_segs - len(inputs))
         
             
         # Segment element orders:
@@ -96,13 +126,23 @@ class seg_mock:
         bottoms = []
         
         input_i = 0
-        while input_i < len(inputs):
         
-            try:
+        while input_i < len(inputs):
+            
+            # Cycle through individual characters and render
+            if input_mode == 'number':
                 input_int = int(inputs[input_i])
                 input_int = self._ints[input_int]
-            except:
-                input_int = self._chars[inputs[input_i].lower()]
+            elif input_mode == 'string':
+                # Can be alphanumeric
+                try:
+                    input_int = int(inputs[input_i])
+                    input_int = self._ints[input_int]
+                except:
+                    input_int = self._chars[inputs[input_i].lower()]
+            else:
+                # Input must be displayed as a raw byte (unmapped value)
+                input_int = int(inputs[input_i])
                 
             # Handle the dot if provided
             if input_i+1 < len(inputs):
@@ -112,7 +152,7 @@ class seg_mock:
             
             # Convert to binary byte from binary values
             input_byte_str = str(format(input_int, '08b'))
-            
+                        
             # Covent the byte into individual lights (elements on/off)
             display_elements = []
             i_val = 0

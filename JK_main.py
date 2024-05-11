@@ -163,7 +163,7 @@ spatial_win_length = 4
 
 class SpatialGame(MiniGame):
     def __init__(self) -> None:
-        # Wet the win length to be half of the number of segments
+        # Set the win length to be half of the number of segments
         self.win_length = int(self.tm1638.num_segments / 2)
         self.setup_routine = self.spatial_setup
         self.correct_answer_action = self.spatial_correct_answer_action
@@ -198,7 +198,7 @@ class SpatialGame(MiniGame):
 
         return return_dict
 
-    def spatial_correct_answer_action(self):
+    def spatial_correct_answer_action(self) -> List[int]:
         """
         Display / response when a correct answer is given for spatial reasoning game
 

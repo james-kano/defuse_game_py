@@ -23,6 +23,7 @@
 # """
 
 from decorators import testing_wrapper
+from display_mocks import seg_mock, led_mock
 
 class TM1638Animated():
     """
@@ -85,7 +86,6 @@ class TM1638Animated():
         """
         pass
 
-    @testing_wrapper(message="Performing <display LINE>")
     def display_line(self,
                      line):
         """
@@ -95,6 +95,12 @@ class TM1638Animated():
         assert len(line) <= self.num_segments, \
             f"This board is currently configured for a maximum of {self.num_segments} segment displays. " \
             "Use self.scroll() for longer display lines"
+
+        if self.test_mode:
+            test_seg = seg_mock()
+            test_seg.print_segs(line)
+            return
+
         for i in range(len(line)):
             self.write(line[i], i)
 
@@ -104,11 +110,9 @@ class TM1638Animated():
         Displays LEDs based on binary integer from right
         """
         if self.test_mode:
-            bin_format = f"0{self.num_leds}b"
-            bin_str = str(format(value, bin_format))
-            test_print_list = ['*' if digit == '1' else 'O' for digit in bin_str]
-            test_print_list = str(test_print_list).replace(',', '').replace("'", '')
-            print(f"LEDs: {test_print_list}")
+            test_leds = led_mock(self.num_leds)
+            test_leds.print_val(value)
+            return
 
         # ToDo: add the interface to the driver to display as required
 
@@ -119,11 +123,8 @@ class TM1638Animated():
         e.g. 4 = 1,1,1,1,0,0,0,0 (first 4 leds illuminated)
         """
         if self.test_mode:
-            test_print_list = ["*" if i < value
-                               else "O"
-                               for i in range(self.num_leds)]
-            test_print_list = str(test_print_list).replace(',', '').replace("'", '')
-            print(f"LEDs: {test_print_list}")
+            test_leds = led_mock(self.num_leds)
+            test_leds.print_val_from_left(value)
             return
 
         # ToDo: add the interface to the driver to display as required

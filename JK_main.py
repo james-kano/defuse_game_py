@@ -18,7 +18,7 @@ Copyright (C) 2023  James Kano
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from random import randint
+from random import randint, shuffle
 from seg_game import SevenSegButtonGame, MiniGame
 import time
 from typing import Any, Dict, List
@@ -29,6 +29,7 @@ from rpi_tm1638_animations import TM1638Animated as Tm
 # ------------------- #
 #     Memory game     #
 # ------------------- #
+# Demonstrates use of MiniGame class by setting class variables
 
 mem_win_length = 5
 
@@ -82,6 +83,7 @@ memory_game.input_as_linear_int = False
 # ----------------- #
 #     Math game     #
 # ----------------- #
+# Demonstrates use of MiniGame class by instantiating with methods
 
 math_answer_num = randint(1, 256)
 math_answer_num_str = str(math_answer_num)
@@ -154,8 +156,65 @@ math_game = MiniGame(win_length=math_win_length,
 # ------------------------------ #
 #     Spatial reasoning game     #
 # ------------------------------ #
+# Demonstrates use of MiniGame class by inheritance
 
-spatial_game = MiniGame(win_length=4)
+spatial_win_length = 4
+
+
+class SpatialGame(MiniGame):
+    def __init__(self) -> None:
+        # Set the win length to be half of the number of segments
+        self.win_length = int(self.tm1638.num_segments / 2)
+        self.setup_routine = self.spatial_setup
+        self.correct_answer_action = self.spatial_correct_answer_action
+        super.__init__(win_length=self.win_length)
+
+    def spatial_setup(self, tm1638: Tm) -> Dict[str, Any]:
+        """
+        Setup answers and starting display for spatial reasoning game
+
+        :param tm1638: tm1638 interface (auto-assigned by MiniGame)
+        :return: dictionary of game attributes to set up
+        """
+
+        # Generate the fragments
+        fragment_nums = [randint(1, 127) for i in range(self.win_length)]
+        counterpart_fragments = [127 - frag for frag in fragment_nums]
+
+        # Randomise the fragment order
+        counterpart_shuffle = list(range(4))
+        shuffle(counterpart_shuffle)
+
+        for i in range(len(counterpart_shuffle)):
+            place = counterpart_shuffle.index(i)
+            fragment_nums.append(counterpart_fragments[place])
+
+        correct_answer_sequence = [i + 4 for i in counterpart_shuffle]
+
+        return_dict = {
+            'correct_answer_conditions': correct_answer_sequence,
+            'game_seg_display': fragment_nums,
+        }
+
+        return return_dict
+
+    def spatial_correct_answer_action(self) -> List[int]:
+        """
+        Display / response when a correct answer is given for spatial reasoning game
+
+        :return: List of segments for the game display
+        """
+        updated_seg_display = self.game_seg_display
+        updated_seg_display[self._progress - 1] = 127
+
+        updated_LED_display = 1 << 8 - self._progress
+        self.tm1638.LEDs(updated_LED_display)
+        self.game_LED_display = updated_LED_display
+
+        return updated_seg_display
+
+
+spatial_game = SpatialGame()
 
 
 def main():

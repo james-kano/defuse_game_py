@@ -123,12 +123,12 @@ class MiniGame:
         """
         pass
 
-    @testing_wrapper(message="Game won!")
+    # @testing_wrapper(message="Game won!")
     def _win_screen(self) -> None:
         """
         Displays the win screen.
         """
-        self.tm1638.encode_string("--safe--")
+        self.tm1638.display_line("--safe--")
 
     def _input_to_linear_int(self,
                              input_button: int) -> int:
@@ -204,11 +204,8 @@ class MiniGame:
                     action_kwargs['tm1638'] = self.tm1638
                 self._progress = self.incorrect_answer_action(**action_kwargs)
             else:
-                if self.test_mode:
-                    print("Error")
-                else:
-                    self.tm1638.encode_string("Error")
-                    sleep(1)
+                self.tm1638.display_line("Error")
+                sleep(1)
             self._lives -= 1
 
         # take action if the game has been won or lost
@@ -221,8 +218,8 @@ class MiniGame:
             self.final_display()
         else:
             # show the game screen by default
-            self.tm1638.display_line(self.game_seg_display)
             self.tm1638.LEDs(self.game_LED_display)
+            self.tm1638.display_line(self.game_seg_display)
 
 
 class SevenSegButtonGame:

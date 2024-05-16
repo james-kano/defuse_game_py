@@ -1,51 +1,63 @@
-# """
-# TM1638 Animation library adds animations to Mike Causer's TM1628 Micropython library
-#
-# Copyright (C) 2023  James Kano
-#
-#     This program is free software: you can redistribute it and/or modify
-#     it under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     This program is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#     GNU General Public License for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-# This program requires the TM1638 library written by Mike Causer (2018):
-#     MicroPython TM1638 7-segment LED display driver with keyscan
-#     Copyright (c) 2018 Mike Causer
-#     https://github.com/mcauser/micropython-tm1638
-# """
+"""
+TM1638 Animation library adds animations to Mike Causer's TM1628 Micropython library
+
+Copyright (C) 2023  James Kano
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+This program requires the TM1638 library written by Mike Causer (2018):
+    MicroPython TM1638 7-segment LED display driver with keyscan
+    Copyright (c) 2018 Mike Causer
+    https://github.com/mcauser/micropython-tm1638
+
+Please install the library using the library's included setup.py to enable importing in this file.
+    Command example: python3 rpi-TM1638/setup.py install
+
+    Note: the import for this is only used in TM1638Animated if not in test_mode. This enables test_mode
+    to be run on non raspberry pi devices that do not have GPIO etc.
+"""
 
 from decorators import testing_wrapper
 from display_mocks import seg_mock, led_mock
+from rpi_tm1638_overrides import SegmentsOverride
+
 
 class TM1638Animated():
     """
     TM1638Animated implements existing TM1638 library to add animations.
     """
     def __init__(self,
-                 stb,
-                 clk,
-                 dio,
-                 brightness = 7,
-                 test_mode = False) -> None:
+                 stb: int,
+                 clk: int,
+                 dio: int,
+                 brightness: int = 1,
+                 test_mode: bool = False) -> None:
 
         self.num_segments = 8
         self.num_leds = 8
 
+        self.TM1638 = None
+
         if not test_mode:
+            # from rpi_TM1638.TMBoards import TMBoards
             from drivers.rpi_TM1638.TMBoards import TMBoards
-            from machine import Pin
-            self.TM1638 = TMBoards(stb=Pin(stb),
-                                   clk=Pin(clk),
-                                   dio=Pin(dio),
+            self.TM1638 = TMBoards(stb=stb,
+                                   clk=clk,
+                                   dio=dio,
                                    brightness=brightness)
+            # Functionally extend the TM driver
+            self.TM1638._segments = SegmentsOverride(self.TM1638)
 
             self.num_segments = 8 * self.TM1638.nbBoards # number of seven-segment displays on board
         self.test_mode = test_mode
@@ -101,8 +113,7 @@ class TM1638Animated():
             test_seg.print_segs(line)
             return
 
-        for i in range(len(line)):
-            self.write(line[i], i)
+        self.TM1638.segments[0] = line
 
     def LEDs(self,
              value: int) -> None:

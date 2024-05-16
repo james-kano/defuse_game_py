@@ -177,6 +177,8 @@ class SpatialGame(MiniGame):
         :return: dictionary of game attributes to set up
         """
 
+        tm1638.wave()
+
         # Generate the fragments
         fragment_nums = [randint(1, 127) for i in range(self.win_length)]
         counterpart_fragments = [127 - frag for frag in fragment_nums]
@@ -222,9 +224,9 @@ def main():
     Main method to be executed upon microcontroller boot
     """
     # setup for main execution
-    seg_game = SevenSegButtonGame(stb=2,
-                                  clk=3,
-                                  dio=4)
+    seg_game = SevenSegButtonGame(stb=26,
+                                  clk=13,
+                                  dio=19)
 
     seg_game.register_game('memory', memory_game)
     seg_game.register_game('math', math_game)

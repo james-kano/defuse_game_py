@@ -27,6 +27,7 @@ Please install the library using the library's included setup.py to enable impor
     Note: the import for this is only used in TM1638Animated if not in test_mode. This enables test_mode
     to be run on non raspberry pi devices that do not have GPIO etc.
 """
+import time
 
 from decorators import testing_wrapper
 from display_mocks import seg_mock, led_mock
@@ -44,62 +45,89 @@ class TM1638Animated():
                  brightness: int = 1,
                  test_mode: bool = False) -> None:
 
-        self.num_segments = 8
-        self.num_leds = 8
+        self.num_segments: int = 8
+        self.num_leds: int = 8
 
-        self.TM1638 = None
+        self.TM1638: object = None
 
         if not test_mode:
             # from rpi_TM1638.TMBoards import TMBoards
             from drivers.rpi_TM1638.TMBoards import TMBoards
-            self.TM1638 = TMBoards(stb=stb,
-                                   clk=clk,
-                                   dio=dio,
-                                   brightness=brightness)
+            self.TM1638: TMBoards = TMBoards(stb=stb,
+                                             clk=clk,
+                                             dio=dio,
+                                             brightness=brightness)
             # Functionally extend the TM driver
             self.TM1638._segments = SegmentsOverride(self.TM1638)
 
-            self.num_segments = 8 * self.TM1638.nbBoards # number of seven-segment displays on board
+            self.num_segments: int = 8 * self.TM1638.nbBoards # number of seven-segment displays on board
+            self.bit_format: str = f'0{self.num_segments}b'
         self.test_mode = test_mode
 
     @testing_wrapper(message="Performing <ROLL animation>")
     def roll(self,
-             speed = 250):
+             speed: int = 50,
+             rolls: int = 3):
         """
         Roll animation
         :param speed: controls the speed of animation.
+        :param rolls: number of rolls to be executed.
         """
-        pass
+        self.clear_display()
+        led_bit = 1
+        for num in range(rolls):
+            while led_bit < 64:
+                line = [led_bit for i in range(self.num_segments)]
+                self.display_line(line)
+                led_bit = led_bit << 1
+                time.sleep(1/speed)
 
     @testing_wrapper(message="Performing <WAVE animation>")
     def wave(self,
-             speed = 250):
+             speed: int = 50,
+             waves: int = 2):
         """
         Wave animation
         :param speed: controls the speed of animation.
+        :param waves: number of waves to display.
         """
-        pass
+        self.clear_display()
+        for wave in range(waves):
+            for place in range(6):
+                line = [1 << pos + place if pos + place < 6
+                        else 1 << pos + place - 6
+                        for pos in range(8)]
+                self.display_line(line)
+                time.sleep(1/speed)
 
     @testing_wrapper(message="Performing <LOAD animation>")
     def load(self,
-             speed = 250):
+             speed: int = 50):
         """
         Load animation
         :param speed: controls the speed of animation.
         """
-        pass
+        self.clear_display()
+        for pos in range(self.num_segments):
+            self.display_line('.' * pos)
+            time.sleep(1/speed)
 
     @testing_wrapper(message="Performing <UNLOAD animation>")
     def unload(self,
-               speed = 250):
+               speed: int = 50):
         """
         Unload animation
         :param speed: controls the speed of animation.
         """
-        pass
+        self.clear_display()
+        pos = self.num_segments
+        while pos > 0:
+            self.display_line('.' * pos)
+            pos -= 1
+            time.sleep(1/speed)
 
     def display_line(self,
-                     line):
+                     line: str):
         """
         Displays a line of custom values
         :param line:
@@ -118,29 +146,36 @@ class TM1638Animated():
     def LEDs(self,
              value: int) -> None:
         """
-        Displays LEDs based on binary integer from right
+        Displays LEDs based on binary form of integer
         """
         if self.test_mode:
             test_leds = led_mock(self.num_leds)
             test_leds.print_val(value)
             return
 
-        # ToDo: add the interface to the driver to display as required
+        # Output the LED value
+        val_byte = str(format(value, self.bit_format))
+        val_i = 0
+        for bit in val_byte:
+            self.TM1638.leds[val_i] = int(bit)
+            val_i += 1
 
     def LEDs_from_left(self,
                        value: int) -> None:
         """
         Displays a number expressed as LEDs illuminated from the left
-        e.g. 4 = 1,1,1,1,0,0,0,0 (first 4 leds illuminated)
+        e.g. 4 = 1,1,1,1,0,0,0,0 (first 4 LEDs illuminated)
         """
         if self.test_mode:
             test_leds = led_mock(self.num_leds)
             test_leds.print_val_from_left(value)
             return
 
-        # ToDo: add the interface to the driver to display as required
+        # Clear and output LEDs
+        for led in range(self.num_segments):
+            self.TM1638.leds[led] = False or (led < value)
 
-    @testing_wrapper(message="<clear dislpay>")
+    @testing_wrapper(message="<clear display>")
     def clear_display(self):
         """
         Clears the display

@@ -38,7 +38,7 @@ class SegmentsOverride(object):
 		"""Initialize the Segment object"""
 		self._TM = TM
 		self._intern = [0, ] * (8 * self._TM.nbBoards)  # 8 7-segments per board
-		self._base_segments = Segments(self)
+		self._base_segments = Segments(self._TM)
 
 	def __setitem__(self, index, value):
 		"""

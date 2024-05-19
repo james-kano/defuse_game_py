@@ -66,7 +66,7 @@ class TM1638Animated():
 
     @testing_wrapper(message="Performing <ROLL animation>")
     def roll(self,
-             speed: int = 50,
+             speed: int = 10,
              rolls: int = 3):
         """
         Roll animation
@@ -74,8 +74,8 @@ class TM1638Animated():
         :param rolls: number of rolls to be executed.
         """
         self.clear_display()
-        led_bit = 1
         for num in range(rolls):
+            led_bit = 1
             while led_bit < 64:
                 line = [led_bit for i in range(self.num_segments)]
                 self.display_line(line)
@@ -109,7 +109,7 @@ class TM1638Animated():
         """
         self.clear_display()
         for pos in range(self.num_segments):
-            self.display_line('.' * pos)
+            self.display_line(' .' * pos)
             time.sleep(1/speed)
 
     @testing_wrapper(message="Performing <UNLOAD animation>")
@@ -122,7 +122,8 @@ class TM1638Animated():
         self.clear_display()
         pos = self.num_segments
         while pos > 0:
-            self.display_line('.' * pos)
+            self.display_line(' ' * self.num_segments)
+            self.display_line(' .' * pos)
             pos -= 1
             time.sleep(1/speed)
 
@@ -132,7 +133,12 @@ class TM1638Animated():
         Displays a line of custom values
         :param line:
         """
-        assert len(line) <= self.num_segments, \
+        check_line = line
+        if isinstance(line, str):
+            check_line = line.replace('.', '')
+        elif isinstance(line, float):
+            check_line = str(line).replace('.', '')
+        assert len(check_line) <= self.num_segments, \
             f"This board is currently configured for a maximum of {self.num_segments} segment displays. " \
             "Use self.scroll() for longer display lines"
 

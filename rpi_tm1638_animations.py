@@ -84,7 +84,7 @@ class TM1638Animated():
 
     @testing_wrapper(message="Performing <WAVE animation>")
     def wave(self,
-             speed: int = 50,
+             speed: int = 10,
              waves: int = 2):
         """
         Wave animation
@@ -102,7 +102,7 @@ class TM1638Animated():
 
     @testing_wrapper(message="Performing <LOAD animation>")
     def load(self,
-             speed: int = 50):
+             speed: int = 10):
         """
         Load animation
         :param speed: controls the speed of animation.
@@ -114,7 +114,7 @@ class TM1638Animated():
 
     @testing_wrapper(message="Performing <UNLOAD animation>")
     def unload(self,
-               speed: int = 50):
+               speed: int = 10):
         """
         Unload animation
         :param speed: controls the speed of animation.

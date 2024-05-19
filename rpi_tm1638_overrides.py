@@ -24,6 +24,7 @@ Classes given below are modifications of the TM1638 library written by Mike Caus
 """
 
 from rpi_TM1638.TMBoards import TMBoards
+from rpi_TM1638.TMBoards import Segments
 # from drivers.rpi_TM1638.TMBoards import Segments
 
 

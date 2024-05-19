@@ -121,7 +121,7 @@ class TM1638Animated():
         """
         self.clear_display()
         pos = self.num_segments
-        while pos > 0:
+        while pos >= 0:
             self.display_line(' ' * self.num_segments)
             self.display_line(' .' * pos)
             pos -= 1

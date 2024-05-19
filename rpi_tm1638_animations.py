@@ -51,8 +51,8 @@ class TM1638Animated():
         self.TM1638: object = None
 
         if not test_mode:
-            # from rpi_TM1638.TMBoards import TMBoards
-            from drivers.rpi_TM1638.TMBoards import TMBoards
+            from rpi_TM1638.TMBoards import TMBoards
+            # from drivers.rpi_TM1638.TMBoards import TMBoards
             self.TM1638: TMBoards = TMBoards(stb=stb,
                                              clk=clk,
                                              dio=dio,

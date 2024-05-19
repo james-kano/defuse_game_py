@@ -23,8 +23,8 @@ Classes given below are modifications of the TM1638 library written by Mike Caus
     https://github.com/mcauser/micropython-tm1638
 """
 
-# from rpi_TM1638.TMBoards import TMBoards
-from drivers.rpi_TM1638.TMBoards import Segments
+from rpi_TM1638.TMBoards import TMBoards
+# from drivers.rpi_TM1638.TMBoards import Segments
 
 
 class SegmentsOverride(object):

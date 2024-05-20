@@ -19,7 +19,7 @@ Copyright (C) 2023  James Kano
 """
 
 from random import randint, shuffle
-from seg_game import SevenSegButtonGame, MiniGame
+from seg_game_typehinted import SevenSegButtonGame, MiniGame
 import time
 from typing import Any, Dict, List
 
@@ -43,11 +43,11 @@ def memory_setup(tm1638: Tm) -> Any:
     """
     memorable_sequence = [1 << randint(0, 7) for i in range(mem_win_length)]
     for led_num in memorable_sequence:
-        tm1638.led(led_num, 1)
+        tm1638.leds[led_num] = True
         time.sleep(0.5)
-        tm1638.leds(0)
+        tm1638.leds[led_num] = False
         time.sleep(0.25)
-        tm1638.encode_string('-' * mem_win_length)
+        tm1638.display_line('-' * mem_win_length)
 
     start_seg_display = [64] * mem_win_length
 
@@ -162,12 +162,19 @@ spatial_win_length = 4
 
 
 class SpatialGame(MiniGame):
-    def __init__(self) -> None:
+    def __init__(self,
+                 tm1638: Tm) -> None:
+        """
+        Space game class inherited from MiniGame
+        """
+        self.tm1638: Tm = tm1638
         # Set the win length to be half of the number of segments
-        self.win_length = int(self.tm1638.num_segments / 2)
-        self.setup_routine = self.spatial_setup
-        self.correct_answer_action = self.spatial_correct_answer_action
-        super.__init__(win_length=self.win_length)
+        self.win_length: int = int(self.tm1638.num_segments / 2)
+        self.setup_routine: callable = self.spatial_setup
+        self.correct_answer_action: callable = self.spatial_correct_answer_action
+        super().__init__(self,
+                         win_length=self.win_length,
+                         tm1638=self.tm1638)
 
     def spatial_setup(self, tm1638: Tm) -> Dict[str, Any]:
         """
@@ -216,9 +223,6 @@ class SpatialGame(MiniGame):
         return updated_seg_display
 
 
-spatial_game = SpatialGame()
-
-
 def main():
     """
     Main method to be executed upon microcontroller boot
@@ -230,6 +234,8 @@ def main():
 
     seg_game.register_game('memory', memory_game)
     seg_game.register_game('math', math_game)
+
+    spatial_game = SpatialGame(tm1638 = seg_game.tm)
     seg_game.register_game('space', spatial_game)
 
     seg_game.setup()

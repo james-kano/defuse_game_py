@@ -20,7 +20,7 @@ Copyright (C) 2023  James Kano
 from inspect import getfullargspec
 from random import randint
 
-from pico_tm1638_animations import TM1638Animated
+from rpi_tm1638_animations import TM1638Animated
 
 
 class MiniGame:

@@ -61,8 +61,13 @@ class TM1638Animated():
             self.TM1638._segments = SegmentsOverride(self.TM1638)
 
             self.num_segments: int = 8 * self.TM1638.nbBoards # number of seven-segment displays on board
-            self.bit_format: str = f'0{self.num_segments}b'
-        self.test_mode = test_mode
+
+            self.leds = self.TM1638.leds
+            self.segments = self.TM1638.segments
+
+        self.test_mode: bool = test_mode
+        self.bit_format: str = f'0{self.num_segments}b'
+
 
     @testing_wrapper(message="Performing <ROLL animation>")
     def roll(self,

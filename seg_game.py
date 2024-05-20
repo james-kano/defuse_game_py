@@ -18,7 +18,6 @@ Copyright (C) 2023  James Kano
 """
 
 from inspect import getfullargspec
-from machine import Pin
 from random import randint
 
 from pico_tm1638_animations import TM1638Animated
@@ -166,9 +165,9 @@ class SevenSegButtonGame:
         :param clk: Specifies the clk pin number
         :param dio: Specifies the dio pin number
         """
-        self.tm = TM1638Animated(stb=Pin(stb),
-                                 clk=Pin(clk),
-                                 dio=Pin(dio),
+        self.tm = TM1638Animated(stb=stb,
+                                 clk=clk,
+                                 dio=dio,
                                  brightness=4)
 
         self._game_register = {}

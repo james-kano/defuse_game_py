@@ -237,7 +237,7 @@ def main():
     spatial_game = SpatialGame(tm1638 = seg_game.tm)
     seg_game.register_game('space', spatial_game)
 
-    seg_game.setup()
+    seg_game.select_game()
 
     while seg_game.selected_game._alive:
         if seg_game.in_standby:

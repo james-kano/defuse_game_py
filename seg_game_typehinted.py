@@ -292,12 +292,10 @@ class SevenSegButtonGame:
             self._is_pressed = False
         return 0
 
-    def setup(self,
-              selected_game_name: str = None) -> None:
+    def select_game(self,
+                    selected_game_name: str = None) -> None:
         """
-        Runs the setup of the registered MiniGame.
-            Note: all games should be registered before this function call
-
+        Selects a MiniGame from the register to be played
         :param selected_game_name: Enables a specific game to be selected and played
         """
         assert len(self._game_register) > 0, "No games registered! Please ragester at least 1 game."
@@ -308,10 +306,15 @@ class SevenSegButtonGame:
         self.tm.clear_display()
         self.tm.roll()
         sleep(1)
-
+        
         self.selected_game = self._game_register[selected_game_name]
-        self.selected_game.setup()
 
+    def setup(self) -> None:
+        """
+        Runs the setup of the registered MiniGame.
+            Note: all games should be registered before this function call
+        """
+        self.selected_game.setup()
         self._setup_run = True
 
     def show_selected_game(self) -> None:
@@ -319,7 +322,6 @@ class SevenSegButtonGame:
         Displays the selected game on the LED display by the number of lit LEDs
         """
         game_select_display = (1 << (self._game_select + 1)) - 1
-        self.tm.clear_display()
         self.tm.LEDs_from_left(game_select_display)
 
     def standby_start_loop(self) -> None:

@@ -31,7 +31,6 @@ import time
 
 from decorators import testing_wrapper
 from display_mocks import seg_mock, led_mock
-from rpi_tm1638_overrides import SegmentsOverride
 
 
 class TM1638Animated():
@@ -52,6 +51,7 @@ class TM1638Animated():
 
         if not test_mode:
             from rpi_TM1638.TMBoards import TMBoards
+            from rpi_tm1638_overrides import SegmentsOverride
             # from drivers.rpi_TM1638.TMBoards import TMBoards
             self.TM1638: TMBoards = TMBoards(stb=stb,
                                              clk=clk,

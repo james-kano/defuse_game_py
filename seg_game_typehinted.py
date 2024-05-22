@@ -306,7 +306,7 @@ class SevenSegButtonGame:
         self.tm.clear_display()
         self.tm.roll()
         sleep(1)
-        
+
         self.selected_game = self._game_register[selected_game_name]
 
     def setup(self) -> None:
@@ -321,8 +321,7 @@ class SevenSegButtonGame:
         """
         Displays the selected game on the LED display by the number of lit LEDs
         """
-        game_select_display = (1 << (self._game_select + 1)) - 1
-        self.tm.LEDs_from_left(game_select_display)
+        self.tm.LEDs_from_left(self._game_select + 1)
 
     def standby_start_loop(self) -> None:
         """

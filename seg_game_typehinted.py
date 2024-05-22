@@ -305,6 +305,10 @@ class SevenSegButtonGame:
             self._game_select = randint(0, len(self._game_register) - 1)
             selected_game_name = list(self._game_register.keys())[self._game_select]
 
+        self.tm.clear_display()
+        self.tm.roll()
+        sleep(1)
+
         self.selected_game = self._game_register[selected_game_name]
         self.selected_game.setup()
 
@@ -315,9 +319,6 @@ class SevenSegButtonGame:
         Displays the selected game on the LED display by the number of lit LEDs
         """
         game_select_display = (1 << (self._game_select + 1)) - 1
-        self.tm.clear_display()
-        self.tm.roll()
-        sleep(1)
         self.tm.clear_display()
         self.tm.LEDs_from_left(game_select_display)
 

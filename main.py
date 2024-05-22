@@ -198,7 +198,6 @@ class SpatialGame(MiniGame):
             fragment_nums.append(counterpart_fragments[place])
 
         correct_answer_sequence = [i + 4 for i in counterpart_shuffle]
-        print(correct_answer_sequence)
 
         return_dict = {
             'correct_answer_conditions': correct_answer_sequence,

@@ -157,7 +157,9 @@ class TM1638Animated():
     def LEDs(self,
              value: int) -> None:
         """
-        Displays LEDs based on binary form of integer
+        Displays LEDs based on binary form of integer as byte
+
+        NOTE: to display the LED based in the LED's integer number, use leds[i] = <bool>
         """
         if self.test_mode:
             test_leds = led_mock(self.num_leds)
@@ -192,10 +194,3 @@ class TM1638Animated():
         Clears the display
         """
         self.TM1638.clearDisplay()
-
-
-
-
-# ToDo:
-# - Add roll / wave / load / unload etc.
-# - Add ability to write custom values to display.

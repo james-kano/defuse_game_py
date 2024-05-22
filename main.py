@@ -43,9 +43,9 @@ def memory_setup(tm1638: Tm) -> Any:
     """
     memorable_sequence = [1 << randint(0, 7) for i in range(mem_win_length)]
     for led_num in memorable_sequence:
-        tm1638.leds[led_num] = True
+        tm1638.LEDs(led_num)
         time.sleep(0.5)
-        tm1638.leds[led_num] = False
+        tm1638.LEDs(0)
         time.sleep(0.25)
         tm1638.display_line('-' * mem_win_length)
 
@@ -170,10 +170,10 @@ class SpatialGame(MiniGame):
         self.tm1638: Tm = tm1638
         # Set the win length to be half of the number of segments
         self.win_length: int = int(self.tm1638.num_segments / 2)
-        self.setup_routine: callable = self.spatial_setup
-        self.correct_answer_action: callable = self.spatial_correct_answer_action
         super().__init__(win_length=self.win_length,
                          tm1638=self.tm1638)
+        self.setup_routine: callable = self.spatial_setup
+        self.correct_answer_action: callable = self.spatial_correct_answer_action
 
     def spatial_setup(self, tm1638: Tm) -> Dict[str, Any]:
         """
@@ -198,6 +198,7 @@ class SpatialGame(MiniGame):
             fragment_nums.append(counterpart_fragments[place])
 
         correct_answer_sequence = [i + 4 for i in counterpart_shuffle]
+        print(correct_answer_sequence)
 
         return_dict = {
             'correct_answer_conditions': correct_answer_sequence,

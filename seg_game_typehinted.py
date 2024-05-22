@@ -284,7 +284,7 @@ class SevenSegButtonGame:
 
         :return: Integer of allowed button input
         """
-        key_pressed = int(self.tm.qyf_keys())
+        key_pressed = self.tm.check_button_values()
         if key_pressed > 0 and not self._is_pressed:
             self._is_pressed = True
             return key_pressed
@@ -326,7 +326,7 @@ class SevenSegButtonGame:
         Executes game display then awaits user activation of the game(s)
         """
         # show selected game number and get the player input
-        self.shows_elected_game()
+        self.show_selected_game()
         player_input = self._check_new_input()
 
         if player_input > 0:

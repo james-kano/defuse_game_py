@@ -64,6 +64,7 @@ class TM1638Animated():
 
             self.leds = self.TM1638.leds
             self.segments = self.TM1638.segments
+            self.switches = self.TM1638.switches
 
         self.test_mode: bool = test_mode
         self.bit_format: str = f'0{self.num_segments}b'
@@ -194,3 +195,17 @@ class TM1638Animated():
         Clears the display
         """
         self.TM1638.clearDisplay()
+
+    def check_button_values(self) -> int:
+        """
+        Returns the value of any button presses as an integer representation of a byte
+            e.g. second button from right -> 00000010 = 2
+        """
+        buttons_pressed = []
+        for button in range(self.num_segments):
+            buttons_pressed.append(str(int(self.switches[button])))
+
+        buttons_str = ''.join(buttons_pressed)
+        button_int = int(buttons_str, 2)
+
+        return button_int

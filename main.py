@@ -242,7 +242,7 @@ def main():
 
     while seg_game.selected_game._alive:
         if seg_game.in_standby:
-            seg_game.standby_start_loop
+            seg_game.standby_start_loop()
         else:
             seg_game.game_loop()
 

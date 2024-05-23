@@ -308,7 +308,7 @@ class SevenSegButtonGame:
         sleep(1)
 
         self.selected_game = self._game_register[selected_game_name]
-        # self.show_selected_game()
+        self.show_selected_game()
 
     def setup(self) -> None:
         """

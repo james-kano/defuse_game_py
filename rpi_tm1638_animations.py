@@ -142,6 +142,7 @@ class TM1638Animated():
         check_line = line
         if isinstance(line, str):
             check_line = line.replace('.', '')
+            line = f"{line}{' ' * (self.num_segments - len(line))}"
         elif isinstance(line, float):
             check_line = str(line).replace('.', '')
         assert len(check_line) <= self.num_segments, \

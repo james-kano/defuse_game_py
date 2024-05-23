@@ -208,4 +208,6 @@ class TM1638Animated():
         buttons_str = ''.join(buttons_pressed)
         button_int = int(buttons_str, 2)
 
+        # sleep 0.05 prevents the board getting confused
+        time.sleep(0.05)
         return button_int

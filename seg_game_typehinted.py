@@ -308,14 +308,16 @@ class SevenSegButtonGame:
         sleep(1)
 
         self.selected_game = self._game_register[selected_game_name]
+        # self.show_selected_game()
 
     def setup(self) -> None:
         """
         Runs the setup of the registered MiniGame.
             Note: all games should be registered before this function call
         """
-        self.selected_game.setup()
-        self._setup_run = True
+        if not self._setup_run:
+            self.selected_game.setup()
+            self._setup_run = True
 
     def show_selected_game(self) -> None:
         """
@@ -328,18 +330,17 @@ class SevenSegButtonGame:
         Executes game display then awaits user activation of the game(s)
         """
         # show selected game number and get the player input
-        self.show_selected_game()
         player_input = self._check_new_input()
-
         if player_input > 0:
             if player_input == 64:
-                self.standby_presses += 1
+                self._standby_presses += 1
             else:
                 self.selected_game.final_display(set_lose=False)
 
         # exit standby mode if the correct button is pressed twice
         if self._standby_presses >= 2:
             self.in_standby = False
+            self.setup()
             self.tm.display_line(self.selected_game.game_seg_display)
             self.tm.LEDs(self.selected_game.game_LED_display)
 
@@ -355,7 +356,6 @@ class SevenSegButtonGame:
 
         # get the player input
         player_input = self._check_new_input()
-
         # pass the player input to the game to play a turn
         if player_input > 0:
             if self.selected_game.show_button_feedback:

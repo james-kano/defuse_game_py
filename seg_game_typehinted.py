@@ -362,4 +362,4 @@ class SevenSegButtonGame:
                 self.tm.LEDs(player_input)
             self.selected_game.play(player_input)
         elif self.selected_game.show_button_feedback:
-            self.LEDs(0)
+            self.tm.LEDs(0)

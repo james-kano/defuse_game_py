@@ -37,8 +37,8 @@ class SegmentsOverride(object):
 	def __init__(self, TM):
 		"""Initialize the Segment object"""
 		self._TM = TM
-		self._intern = [0, ] * (8 * self._TM.nbBoards)  # 8 7-segments per board
 		self._base_segments = Segments(self._TM)
+		self._intern = self._base_segments._intern
 
 	def __setitem__(self, index, value):
 		"""
@@ -52,6 +52,8 @@ class SegmentsOverride(object):
 			self._base_segments[index] = value
 
 		except ValueError:
+
+
 			if isinstance(index, int):
 				# parse string to transform it in list of 8-bit int to send to the TM1638
 				# -> allows to parse the '.' characters

@@ -60,7 +60,7 @@ class MiniGame:
             • This may be useful where multiple correct answers are possible
             • Returns the converted input for answer comparison
         :param input_as_linear_int: Tells the game to convert button value to button number 0-7 left to right
-            • e.g. input of 8 = button 3
+            • e.g. input of first button from left = 0 (press already confirmed so first button = 0th position)
         :param show_button_feedback: Determines if a corresponding LED should light with a button press
         :param correct_answer_action: Function for correct action response (progress increment is handled automatically)
             • This may take an argument of 'progress' which will access the MiniGame's progress attribute
@@ -143,7 +143,7 @@ class MiniGame:
         if self.test_mode:
             print(f"{input_button} converted to: {linear_int}")
 
-        return linear_int
+        return self.tm1638.num_segments - linear_int - 1
 
     def final_display(self,
                       set_lose: bool = False) -> None:
@@ -180,7 +180,7 @@ class MiniGame:
             map_input_kwargs = {arg: getattr(self, arg) for arg in map_input_args
                                 if arg in self.__dict__}
             input_button = self.map_input(input_button, **map_input_kwargs)
-        if input_button == self.correct_answer_conditions[self._progress]:
+        if int(input_button) == int(self.correct_answer_conditions[self._progress]):
             self._progress += 1
             if self.correct_answer_action is not None:
                 action_kwargs = {}

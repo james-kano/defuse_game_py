@@ -113,8 +113,8 @@ def math_setup(tm1638: Tm) -> Dict[str, Any]:
         answer_int_positions[rand_position] = int(answer_list[i])
 
     # generate answer sequence and starting display
-    start_seg_display = [randint(0, 9) if i not in answer_int_positions
-                         else answer_int_positions[i]
+    start_seg_display = [str(randint(0, 9)) if i not in answer_int_positions
+                         else str(answer_int_positions[i])
                          for i in range(tm1638.num_segments)]
 
     return_dict = {
@@ -174,6 +174,7 @@ class SpatialGame(MiniGame):
                          tm1638=self.tm1638)
         self.setup_routine: callable = self.spatial_setup
         self.correct_answer_action: callable = self.spatial_correct_answer_action
+        self.input_as_linear_int: bool = True
 
     def spatial_setup(self, tm1638: Tm) -> Dict[str, Any]:
         """
@@ -249,3 +250,7 @@ def main():
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     main()
+
+# ToDo: math incorrect answer breaks
+# ToDo: screen timout switches off
+# ToDo: 'f' in FONT incorrect

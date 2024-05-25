@@ -201,6 +201,7 @@ class TM1638Animated():
         """
         Returns the value of any button presses as an integer representation of a byte
             e.g. second button from right -> 00000010 = 2
+        :return: integer of pressed button(s)
         """
         buttons_pressed = []
         for button in range(self.num_segments):

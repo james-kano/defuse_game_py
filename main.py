@@ -141,7 +141,7 @@ def math_incorrect_answer_action(tm1638: Tm) -> List[Any]:
 
     :param tm1638: tm1638 interface (auto-assigned by MiniGame)
     """
-    tm1638.encode_string("Error")
+    tm1638.display_line("Error")
     return 0
 
 
@@ -240,11 +240,14 @@ def main():
 
     seg_game.select_game()
 
-    while seg_game.selected_game._alive:
+    while seg_game.selected_game._alive and not seg_game.selected_game._show_final_display():
         if seg_game.in_standby:
             seg_game.standby_start_loop()
         else:
             seg_game.game_loop()
+
+    time.sleep(2)
+    seg_game.tm.clear_display()
 
 
 # Press the green button in the gutter to run the script.

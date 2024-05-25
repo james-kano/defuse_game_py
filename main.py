@@ -240,7 +240,7 @@ def main():
 
     seg_game.select_game()
 
-    while seg_game.selected_game._alive and not seg_game.selected_game._show_final_display():
+    while seg_game.selected_game._alive and not seg_game.selected_game._show_final_display:
         if seg_game.in_standby:
             seg_game.standby_start_loop()
         else:
@@ -254,6 +254,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-# ToDo: math incorrect answer breaks
 # ToDo: screen timout switches off
 # ToDo: 'f' in FONT incorrect
+# ToDo: MiniGame in_play with getter (seg_game.selected_game._alive and not seg_game.selected_game._show_final_display)

@@ -121,6 +121,8 @@ class MiniGame:
         """
         Displays the game-over screen.
         """
+        self.tm1638.LEDs(255)
+        self.tm1638.display_line('88888888')
         pass
 
     # @testing_wrapper(message="Game won!")
@@ -128,7 +130,7 @@ class MiniGame:
         """
         Displays the win screen.
         """
-        self.tm1638.display_line("--safe--")
+        self.tm1638.display_line("--SAFE--")
 
     def _input_to_linear_int(self,
                              input_button: int) -> int:

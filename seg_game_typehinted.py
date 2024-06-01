@@ -60,7 +60,7 @@ class MiniGame:
             • This may be useful where multiple correct answers are possible
             • Returns the converted input for answer comparison
         :param input_as_linear_int: Tells the game to convert button value to button number 0-7 left to right
-            • e.g. input of 8 = button 3
+            • e.g. input of first button from left = 0 (press already confirmed so first button = 0th position)
         :param show_button_feedback: Determines if a corresponding LED should light with a button press
         :param correct_answer_action: Function for correct action response (progress increment is handled automatically)
             • This may take an argument of 'progress' which will access the MiniGame's progress attribute
@@ -121,6 +121,8 @@ class MiniGame:
         """
         Displays the game-over screen.
         """
+        self.tm1638.LEDs(255)
+        self.tm1638.display_line('88888888')
         pass
 
     # @testing_wrapper(message="Game won!")
@@ -128,7 +130,7 @@ class MiniGame:
         """
         Displays the win screen.
         """
-        self.tm1638.display_line("--safe--")
+        self.tm1638.display_line("--SAFE--")
 
     def _input_to_linear_int(self,
                              input_button: int) -> int:
@@ -143,7 +145,7 @@ class MiniGame:
         if self.test_mode:
             print(f"{input_button} converted to: {linear_int}")
 
-        return linear_int
+        return self.tm1638.num_segments - linear_int - 1
 
     def final_display(self,
                       set_lose: bool = False) -> None:
@@ -180,7 +182,7 @@ class MiniGame:
             map_input_kwargs = {arg: getattr(self, arg) for arg in map_input_args
                                 if arg in self.__dict__}
             input_button = self.map_input(input_button, **map_input_kwargs)
-        if input_button == self.correct_answer_conditions[self._progress]:
+        if int(input_button) == int(self.correct_answer_conditions[self._progress]):
             self._progress += 1
             if self.correct_answer_action is not None:
                 action_kwargs = {}
@@ -284,7 +286,7 @@ class SevenSegButtonGame:
 
         :return: Integer of allowed button input
         """
-        key_pressed = int(self.tm.qyf_keys())
+        key_pressed = self.tm.check_button_values()
         if key_pressed > 0 and not self._is_pressed:
             self._is_pressed = True
             return key_pressed
@@ -292,12 +294,10 @@ class SevenSegButtonGame:
             self._is_pressed = False
         return 0
 
-    def setup(self,
-              selected_game_name: str = None) -> None:
+    def select_game(self,
+                    selected_game_name: str = None) -> None:
         """
-        Runs the setup of the registered MiniGame.
-            Note: all games should be registered before this function call
-
+        Selects a MiniGame from the register to be played
         :param selected_game_name: Enables a specific game to be selected and played
         """
         assert len(self._game_register) > 0, "No games registered! Please ragester at least 1 game."
@@ -305,39 +305,44 @@ class SevenSegButtonGame:
             self._game_select = randint(0, len(self._game_register) - 1)
             selected_game_name = list(self._game_register.keys())[self._game_select]
 
-        self.selected_game = self._game_register[selected_game_name]
-        self.selected_game.setup()
+        self.tm.clear_display()
+        self.tm.roll()
+        sleep(1)
 
-        self._setup_run = True
+        self.selected_game = self._game_register[selected_game_name]
+        self.show_selected_game()
+
+    def setup(self) -> None:
+        """
+        Runs the setup of the registered MiniGame.
+            Note: all games should be registered before this function call
+        """
+        if not self._setup_run:
+            self.selected_game.setup()
+            self._setup_run = True
 
     def show_selected_game(self) -> None:
         """
         Displays the selected game on the LED display by the number of lit LEDs
         """
-        game_select_display = (1 << (self._game_select + 1)) - 1
-        self.tm.clear_display()
-        self.tm.roll()
-        sleep(1)
-        self.tm.clear_display()
-        self.tm.LEDs_from_left(game_select_display)
+        self.tm.LEDs_from_left(self._game_select + 1)
 
     def standby_start_loop(self) -> None:
         """
         Executes game display then awaits user activation of the game(s)
         """
         # show selected game number and get the player input
-        self.shows_elected_game()
         player_input = self._check_new_input()
-
         if player_input > 0:
             if player_input == 64:
-                self.standby_presses += 1
+                self._standby_presses += 1
             else:
                 self.selected_game.final_display(set_lose=False)
 
         # exit standby mode if the correct button is pressed twice
         if self._standby_presses >= 2:
             self.in_standby = False
+            self.setup()
             self.tm.display_line(self.selected_game.game_seg_display)
             self.tm.LEDs(self.selected_game.game_LED_display)
 
@@ -353,11 +358,10 @@ class SevenSegButtonGame:
 
         # get the player input
         player_input = self._check_new_input()
-
         # pass the player input to the game to play a turn
         if player_input > 0:
             if self.selected_game.show_button_feedback:
                 self.tm.LEDs(player_input)
             self.selected_game.play(player_input)
         elif self.selected_game.show_button_feedback:
-            self.LEDs(0)
+            self.tm.LEDs(0)

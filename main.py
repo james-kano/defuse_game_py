@@ -254,6 +254,5 @@ def main():
 if __name__ == '__main__':
     main()
 
-# ToDo: screen timout switches off
-# ToDo: 'f' in FONT incorrect
+# ToDo: screen timeout switches off
 # ToDo: MiniGame in_play with getter (seg_game.selected_game._alive and not seg_game.selected_game._show_final_display)

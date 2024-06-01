@@ -19,11 +19,11 @@ Copyright (C) 2023  James Kano
 """
 
 from random import randint, shuffle
-from seg_game_typehinted import SevenSegButtonGame, MiniGame
 import time
 from typing import Any, Dict, List
 
-from rpi_tm1638_animations import TM1638Animated as Tm
+from tm1638_game_engine.rpi_tm1638_animations import TM1638Animated as Tm
+from tm1638_game_engine.seg_game_typehinted import SevenSegButtonGame, MiniGame
 
 
 # ------------------- #

@@ -22,8 +22,8 @@ from random import randint
 from time import sleep
 from typing import Any, Callable, Dict, List, Optional
 
-from rpi_tm1638_animations import TM1638Animated
-from decorators import testing_wrapper
+from .rpi_tm1638_animations import TM1638Animated
+from .decorators import testing_wrapper
 
 
 class MiniGame:

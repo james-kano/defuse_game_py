@@ -1,4 +1,4 @@
-from rpi_tm1638_animations import TM1638Animated
+from .rpi_tm1638_animations import TM1638Animated
 import time
 
 anim = TM1638Animated(stb=26, clk=13, dio=19)

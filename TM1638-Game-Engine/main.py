@@ -142,6 +142,7 @@ def math_incorrect_answer_action(tm1638: Tm) -> List[Any]:
     :param tm1638: tm1638 interface (auto-assigned by MiniGame)
     """
     tm1638.display_line("Error")
+    time.sleep(1)
     return 0
 
 
@@ -223,7 +224,7 @@ class SpatialGame(MiniGame):
         return updated_seg_display
 
 
-def main():
+def run_tm1638_games():
     """
     Main method to be executed upon microcontroller boot
     """
@@ -252,7 +253,7 @@ def main():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    main()
+    run_tm1638_games()
 
 # ToDo: screen timeout switches off
 # ToDo: MiniGame in_play with getter (seg_game.selected_game._alive and not seg_game.selected_game._show_final_display)

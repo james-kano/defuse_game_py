@@ -23,7 +23,7 @@ import time
 from typing import Any, Dict, List
 
 from tm1638_game_engine.rpi_tm1638_animations import TM1638Animated as Tm
-from tm1638_game_engine.seg_game_typehinted import SevenSegButtonGame, MiniGame
+from tm1638_game_engine.seg_game_engine import SevenSegButtonGame, MiniGame
 
 
 # ------------------- #
@@ -142,6 +142,7 @@ def math_incorrect_answer_action(tm1638: Tm) -> List[Any]:
     :param tm1638: tm1638 interface (auto-assigned by MiniGame)
     """
     tm1638.display_line("Error")
+    time.sleep(1)
     return 0
 
 
@@ -223,7 +224,7 @@ class SpatialGame(MiniGame):
         return updated_seg_display
 
 
-def main():
+def run_tm1638_games():
     """
     Main method to be executed upon microcontroller boot
     """
@@ -240,7 +241,7 @@ def main():
 
     seg_game.select_game()
 
-    while seg_game.selected_game._alive and not seg_game.selected_game._show_final_display:
+    while seg_game.selected_game.continue_loop:
         if seg_game.in_standby:
             seg_game.standby_start_loop()
         else:
@@ -252,7 +253,4 @@ def main():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    main()
-
-# ToDo: screen timeout switches off
-# ToDo: MiniGame in_play with getter (seg_game.selected_game._alive and not seg_game.selected_game._show_final_display)
+    run_tm1638_games()

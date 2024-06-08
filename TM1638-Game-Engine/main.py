@@ -23,7 +23,7 @@ import time
 from typing import Any, Dict, List
 
 from tm1638_game_engine.rpi_tm1638_animations import TM1638Animated as Tm
-from tm1638_game_engine.seg_game_typehinted import SevenSegButtonGame, MiniGame
+from tm1638_game_engine.seg_game_engine import SevenSegButtonGame, MiniGame
 
 
 # ------------------- #
@@ -241,7 +241,7 @@ def run_tm1638_games():
 
     seg_game.select_game()
 
-    while seg_game.selected_game._alive and not seg_game.selected_game._show_final_display:
+    while seg_game.selected_game.continue_loop:
         if seg_game.in_standby:
             seg_game.standby_start_loop()
         else:
@@ -254,6 +254,3 @@ def run_tm1638_games():
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     run_tm1638_games()
-
-# ToDo: screen timeout switches off
-# ToDo: MiniGame in_play with getter (seg_game.selected_game._alive and not seg_game.selected_game._show_final_display)

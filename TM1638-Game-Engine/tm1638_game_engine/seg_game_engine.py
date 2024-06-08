@@ -92,6 +92,14 @@ class MiniGame:
         self._show_final_display: bool = False
         self.test_mode: bool = test_mode
 
+    @property
+    def continue_loop(self) -> bool:
+        """
+        Simple boolean return to indicate if the game is still being played or finished.
+        """
+        _continue_loop = self._alive and not self._show_final_display
+        return _continue_loop
+
     def setup(self) -> None:
         """
         Setup actions for the MiniGme.
@@ -125,7 +133,7 @@ class MiniGame:
         self.tm1638.display_line('88888888')
         pass
 
-    # @testing_wrapper(message="Game won!")
+    # @testing_wrapper(message="--SAFE--")
     def _win_screen(self) -> None:
         """
         Displays the win screen.
